@@ -48,6 +48,10 @@
 								
 									<a href="invoices/create" class="modal-effect btn btn-sm btn-primary" style="color:white"><i
 											class="fas fa-plus"></i>&nbsp; اضافة فاتورة</a>
+											
+											
+											<a class="modal-effect btn btn-sm btn-success" href="{{ url('invoices_export') }}"
+                            style="color:white"><i class="fas fa-file-download"></i>&nbsp;تصدير اكسيل</a>
 								
 							</div>
 							<div class="card-body">

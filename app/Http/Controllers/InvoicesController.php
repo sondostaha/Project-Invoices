@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InvoicesExport;
 use App\Models\invoices;
 use App\Models\sections;
 use Illuminate\Http\Request;
 use App\Models\invoices_details;
 use Illuminate\Support\Facades\DB;
 use App\Models\invoices_attachments;
+use App\Models\User;
+use App\Notifications\AddInvoice;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Notifications\Add_new_invoice;
 class InvoicesController extends Controller
 {
     
@@ -94,7 +99,27 @@ class InvoicesController extends Controller
 
         }
 
-    
+        // $user= User::first();
+
+        // Notification::send($user ,new AddInvoice($invoices_id));
+
+        $userSchema = User::first();
+        $invoices_id= invoices::latest()->first()->id ;
+        $offerData = [
+            
+            'body' => ':تمت اضافه فاتوره بواسطه',
+            'user'=>Auth::user()->name,
+            'thanks' => 'شكرا لك',
+            'offerText' => 'الفاتوره المضافه',
+            'offerUrl' => url(route('invoicesDetails',$invoices_id)),
+            'offer_id' => $invoices_id,
+        ];
+  
+        Notification::send($userSchema, new Add_new_invoice($offerData));
+       
+
+        
+   
 
         session()->flash('Add','تم اضافه الفاتوره بنجاح');
         return back();
@@ -106,6 +131,7 @@ class InvoicesController extends Controller
         return view('invoices.edit_invoice',compact('invoices','section'));
 
     }
+
 
     public function update(Request $request )
     {
@@ -217,6 +243,7 @@ class InvoicesController extends Controller
             ]);
         }
 
+        
         session()->flash('Edit','تم تعديل حاله الدفع بنجاح');
 
         return back();
@@ -284,5 +311,19 @@ class InvoicesController extends Controller
         return view('invoices.Print_Invoices',compact('invoice'));
     }
 
-    
+    public function export() 
+    {
+        return Excel::download(new InvoicesExport, 'قائمه الفواتير.xlsx');
+    }
+    public function MarkAsRead()
+    {
+        
+        $unreadNotification = auth()->user()->unreadNotifications ;
+        if($unreadNotification)
+        {
+            $unreadNotification->markAsRead();
+            return back();
+        }
+        
+    }
 }

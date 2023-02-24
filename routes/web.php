@@ -3,13 +3,18 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\Customers_Report;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoicesArchiveController;
 use App\Http\Controllers\InvoicesAttachmentsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\InvoicesDetailsController;
+use App\Http\Controllers\InvoicesReportController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SectionsController;
-
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,9 +30,10 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::post('/home', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+    Route::get('/home', [HomeController::class ,'index'])->middleware(['auth', 'verified'])->name('home');
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -81,6 +87,28 @@ Route::resource('archive',InvoicesArchiveController::class);
 
 Route::get('print_invoice/{id}',[InvoicesController::class ,'Print_Invoices']);
 
+//export excel
 
+Route::get('invoices_export', [InvoicesController::class, 'export']);
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
+   
+});
+
+//invoices_reports 
+
+Route::get('/invoices_report',[InvoicesReportController::class,'report_page'])->name('reports');
+Route::post('/search_invoices',[InvoicesReportController::class,'searchReport'])->name('Search_report');
+
+//report
+
+Route::get('/cusromer',[CustomerController::class,'index'])->name('customer_report');
+Route::post('/search_customer',[CustomerController::class, 'searchReport'])->name('Search_Customer');
+
+//تحديد قراءه الاشعارات
+
+Route::get('/markeAsRead',[InvoicesController::class , 'MarkAsRead'])->name('marke_as_read');
 Route::get('/{page}',[AdminController::class , 'index']);
 
